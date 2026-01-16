@@ -1,15 +1,11 @@
 import 'playing_card.dart';
 
-enum MeldType {
-  set,
-  run,
-}
+enum MeldType { set, run }
 
 class Meld {
+  Meld({required this.cards, required this.type});
   final List<PlayingCard> cards;
   final MeldType type;
-
-  Meld({required this.cards, required this.type});
 
   int get points {
     return cards.fold(0, (sum, card) => sum + card.points);
@@ -30,7 +26,7 @@ class Meld {
     final rank = cards.first.rank;
     final suits = <Suit>{};
 
-    for (var card in cards) {
+    for (final card in cards) {
       if (!card.isJoker && card.rank != rank) return false;
       if (!card.isJoker) suits.add(card.suit);
     }
@@ -41,10 +37,12 @@ class Meld {
   bool _isValidRun() {
     if (cards.isEmpty) return false;
 
-    final suit = cards.firstWhere((c) => !c.isJoker, orElse: () => cards.first).suit;
+    final suit = cards
+        .firstWhere((c) => !c.isJoker, orElse: () => cards.first)
+        .suit;
     final nonJokers = cards.where((c) => !c.isJoker).toList();
 
-    for (var card in nonJokers) {
+    for (final card in nonJokers) {
       if (card.suit != suit) return false;
     }
 
@@ -63,25 +61,20 @@ class Meld {
   }
 }
 
-enum GamePhase {
-  draw,
-  play,
-  discard,
-}
+enum GamePhase { draw, play, discard }
 
 class Player {
-  final String name;
-  final List<PlayingCard> hand;
-  final List<Meld> melds;
-  int score;
-
   Player({
     required this.name,
     List<PlayingCard>? hand,
     List<Meld>? melds,
     this.score = 0,
-  })  : hand = hand ?? [],
-        melds = melds ?? [];
+  }) : hand = hand ?? [],
+       melds = melds ?? [];
+  final String name;
+  final List<PlayingCard> hand;
+  final List<Meld> melds;
+  int score;
 
   int get handPoints {
     return hand.fold(0, (sum, card) => sum + card.points);
@@ -102,16 +95,6 @@ class Player {
 }
 
 class RummyGameState {
-  final Deck deck;
-  final List<PlayingCard> discardPile;
-  final List<Player> players;
-  int currentPlayerIndex;
-  GamePhase currentPhase;
-  PlayingCard? drawnCard;
-  int? selectedDiscardIndex;
-  List<int> selectedHandIndices;
-  String? message;
-
   RummyGameState({
     required this.deck,
     required this.discardPile,
@@ -123,6 +106,15 @@ class RummyGameState {
     List<int>? selectedHandIndices,
     this.message,
   }) : selectedHandIndices = selectedHandIndices ?? [];
+  final Deck deck;
+  final List<PlayingCard> discardPile;
+  final List<Player> players;
+  int currentPlayerIndex;
+  GamePhase currentPhase;
+  PlayingCard? drawnCard;
+  int? selectedDiscardIndex;
+  List<int> selectedHandIndices;
+  String? message;
 
   Player get currentPlayer => players[currentPlayerIndex];
 
@@ -130,7 +122,7 @@ class RummyGameState {
 
   void dealCards() {
     for (var i = 0; i < 13; i++) {
-      for (var player in players) {
+      for (final player in players) {
         final card = deck.draw();
         if (card != null) {
           player.hand.add(card);
@@ -143,7 +135,7 @@ class RummyGameState {
       discardPile.add(firstDiscard);
     }
 
-    for (var player in players) {
+    for (final player in players) {
       player.sortHand();
     }
   }
@@ -189,7 +181,7 @@ class RummyGameState {
     }
 
     cardIndices.sort((a, b) => b.compareTo(a));
-    for (var index in cardIndices) {
+    for (final index in cardIndices) {
       currentPlayer.hand.removeAt(index);
     }
 
@@ -247,7 +239,7 @@ class RummyGameState {
   }
 
   void _endRound() {
-    for (var player in players) {
+    for (final player in players) {
       final roundScore = player.meldPoints - player.handPoints;
       player.score += roundScore;
     }
@@ -265,7 +257,7 @@ class RummyGameState {
     deck.reset();
     discardPile.clear();
 
-    for (var player in players) {
+    for (final player in players) {
       player.hand.clear();
       player.melds.clear();
     }

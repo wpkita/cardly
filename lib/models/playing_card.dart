@@ -1,9 +1,4 @@
-enum Suit {
-  hearts,
-  diamonds,
-  clubs,
-  spades,
-}
+enum Suit { hearts, diamonds, clubs, spades }
 
 enum Rank {
   ace,
@@ -22,15 +17,10 @@ enum Rank {
 }
 
 class PlayingCard {
+  PlayingCard({required this.suit, required this.rank, this.isJoker = false});
   final Suit suit;
   final Rank rank;
   final bool isJoker;
-
-  PlayingCard({
-    required this.suit,
-    required this.rank,
-    this.isJoker = false,
-  });
 
   String get suitSymbol {
     switch (suit) {
@@ -117,17 +107,16 @@ class PlayingCard {
 }
 
 class Deck {
-  final List<PlayingCard> cards = [];
-
   Deck() {
     _initialize();
   }
+  final List<PlayingCard> cards = [];
 
   void _initialize() {
     cards.clear();
 
-    for (var suit in Suit.values) {
-      for (var rank in Rank.values) {
+    for (final suit in Suit.values) {
+      for (final rank in Rank.values) {
         cards.add(PlayingCard(suit: suit, rank: rank));
         cards.add(PlayingCard(suit: suit, rank: rank));
       }

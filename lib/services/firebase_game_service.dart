@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/game_room.dart';
 import '../models/playing_card.dart';
 import '../models/rummy_game_state.dart';
@@ -20,17 +22,11 @@ class FirebaseGameService {
       hostPlayerId: hostPlayerId,
       createdAt: DateTime.now(),
       state: GameRoomState.waiting,
-      deckCards: deck.cards.map((c) => CardData.fromPlayingCard(c)).toList(),
+      deckCards: deck.cards.map(CardData.fromPlayingCard).toList(),
       discardPile: [],
       players: [
-        PlayerData(
-          playerId: hostPlayerId,
-          name: hostName,
-          hand: [],
-          melds: [],
-        ),
+        PlayerData(playerId: hostPlayerId, name: hostName, hand: [], melds: []),
       ],
-      currentPhase: 'draw',
       message: 'Waiting for another player to join...',
     );
 
@@ -39,7 +35,10 @@ class FirebaseGameService {
   }
 
   Future<GameRoom?> joinGameRoom(
-      String roomId, String guestPlayerId, String guestName) async {
+    String roomId,
+    String guestPlayerId,
+    String guestName,
+  ) async {
     final roomRef = _database.child('rooms').child(roomId);
     final snapshot = await roomRef.get();
 
@@ -54,12 +53,9 @@ class FirebaseGameService {
     }
 
     room.guestPlayerId = guestPlayerId;
-    room.players.add(PlayerData(
-      playerId: guestPlayerId,
-      name: guestName,
-      hand: [],
-      melds: [],
-    ));
+    room.players.add(
+      PlayerData(playerId: guestPlayerId, name: guestName, hand: [], melds: []),
+    );
 
     await roomRef.update({
       'guestPlayerId': guestPlayerId,
@@ -75,7 +71,7 @@ class FirebaseGameService {
     final roomRef = _database.child('rooms').child(roomId);
 
     for (var i = 0; i < 13; i++) {
-      for (var player in room.players) {
+      for (final player in room.players) {
         if (room.deckCards.isNotEmpty) {
           final card = room.deckCards.removeLast();
           player.hand.add(card);
@@ -87,7 +83,7 @@ class FirebaseGameService {
       room.discardPile.add(room.deckCards.removeLast());
     }
 
-    for (var player in room.players) {
+    for (final player in room.players) {
       player.hand.sort((a, b) {
         if (a.suit != b.suit) {
           return a.suit.compareTo(b.suit);
@@ -109,11 +105,7 @@ class FirebaseGameService {
   }
 
   Stream<GameRoom?> watchGameRoom(String roomId) {
-    return _database
-        .child('rooms')
-        .child(roomId)
-        .onValue
-        .map((event) {
+    return _database.child('rooms').child(roomId).onValue.map((event) {
       if (!event.snapshot.exists) {
         return null;
       }
@@ -128,8 +120,7 @@ class FirebaseGameService {
     if (!snapshot.exists) return;
 
     final room = GameRoom.fromJson(snapshot.value as Map);
-    final playerIndex =
-        room.players.indexWhere((p) => p.playerId == playerId);
+    final playerIndex = room.players.indexWhere((p) => p.playerId == playerId);
 
     if (playerIndex != room.currentPlayerIndex) return;
     if (room.currentPhase != 'draw') return;
@@ -162,8 +153,7 @@ class FirebaseGameService {
     if (!snapshot.exists) return;
 
     final room = GameRoom.fromJson(snapshot.value as Map);
-    final playerIndex =
-        room.players.indexWhere((p) => p.playerId == playerId);
+    final playerIndex = room.players.indexWhere((p) => p.playerId == playerId);
 
     if (playerIndex != room.currentPlayerIndex) return;
     if (room.currentPhase != 'draw') return;
@@ -189,22 +179,27 @@ class FirebaseGameService {
     });
   }
 
-  Future<bool> playMeld(String roomId, String playerId, List<int> cardIndices,
-      String meldType) async {
+  Future<bool> playMeld(
+    String roomId,
+    String playerId,
+    List<int> cardIndices,
+    String meldType,
+  ) async {
     final roomRef = _database.child('rooms').child(roomId);
     final snapshot = await roomRef.get();
 
     if (!snapshot.exists) return false;
 
     final room = GameRoom.fromJson(snapshot.value as Map);
-    final playerIndex =
-        room.players.indexWhere((p) => p.playerId == playerId);
+    final playerIndex = room.players.indexWhere((p) => p.playerId == playerId);
 
     if (playerIndex != room.currentPlayerIndex) return false;
     if (room.currentPhase != 'play') return false;
     if (cardIndices.length < 3) return false;
 
-    final cards = cardIndices.map((i) => room.players[playerIndex].hand[i]).toList();
+    final cards = cardIndices
+        .map((i) => room.players[playerIndex].hand[i])
+        .toList();
     final playingCards = cards.map((c) => c.toPlayingCard()).toList();
     final meld = Meld(
       cards: playingCards,
@@ -218,17 +213,13 @@ class FirebaseGameService {
     }
 
     cardIndices.sort((a, b) => b.compareTo(a));
-    for (var index in cardIndices) {
+    for (final index in cardIndices) {
       room.players[playerIndex].hand.removeAt(index);
     }
 
-    room.players[playerIndex].melds.add(MeldData(
-      cards: cards,
-      type: meldType,
-    ));
+    room.players[playerIndex].melds.add(MeldData(cards: cards, type: meldType));
 
-    room.message =
-        '${room.players[playerIndex].name} played a $meldType';
+    room.message = '${room.players[playerIndex].name} played a $meldType';
 
     await roomRef.update({
       'players': room.players.map((p) => p.toJson()).toList(),
@@ -245,8 +236,7 @@ class FirebaseGameService {
     if (!snapshot.exists) return;
 
     final room = GameRoom.fromJson(snapshot.value as Map);
-    final playerIndex =
-        room.players.indexWhere((p) => p.playerId == playerId);
+    final playerIndex = room.players.indexWhere((p) => p.playerId == playerId);
 
     if (playerIndex != room.currentPlayerIndex) return;
     if (room.currentPhase != 'play') return;
@@ -260,9 +250,11 @@ class FirebaseGameService {
     if (room.players[playerIndex].hand.isEmpty) {
       await _endRound(roomRef, room);
     } else {
-      room.currentPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length;
+      room.currentPlayerIndex =
+          (room.currentPlayerIndex + 1) % room.players.length;
       room.currentPhase = 'draw';
-      room.message = '${room.players[room.currentPlayerIndex].name}\'s turn - Draw a card';
+      room.message =
+          '${room.players[room.currentPlayerIndex].name}\'s turn - Draw a card';
 
       await roomRef.update({
         'players': room.players.map((p) => p.toJson()).toList(),
@@ -275,16 +267,16 @@ class FirebaseGameService {
   }
 
   Future<void> _endRound(DatabaseReference roomRef, GameRoom room) async {
-    for (var player in room.players) {
+    for (final player in room.players) {
       int meldPoints = 0;
-      for (var meld in player.melds) {
-        for (var card in meld.cards) {
+      for (final meld in player.melds) {
+        for (final card in meld.cards) {
           meldPoints += card.toPlayingCard().points;
         }
       }
 
       int handPoints = 0;
-      for (var card in player.hand) {
+      for (final card in player.hand) {
         handPoints += card.toPlayingCard().points;
       }
 
@@ -311,10 +303,10 @@ class FirebaseGameService {
     final deck = Deck();
     deck.shuffle();
 
-    room.deckCards = deck.cards.map((c) => CardData.fromPlayingCard(c)).toList();
+    room.deckCards = deck.cards.map(CardData.fromPlayingCard).toList();
     room.discardPile.clear();
 
-    for (var player in room.players) {
+    for (final player in room.players) {
       player.hand.clear();
       player.melds.clear();
     }

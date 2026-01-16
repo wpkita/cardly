@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../models/rummy_game_state.dart';
 
 class GameControls extends StatelessWidget {
+  const GameControls({
+    required this.gameState,
+    required this.onDrawFromDeck,
+    super.key,
+    this.onDrawFromDiscard,
+    this.onPlaySet,
+    this.onPlayRun,
+    this.onDiscard,
+    this.onClearSelection,
+  });
   final RummyGameState gameState;
   final VoidCallback onDrawFromDeck;
   final VoidCallback? onDrawFromDiscard;
@@ -9,17 +20,6 @@ class GameControls extends StatelessWidget {
   final VoidCallback? onPlayRun;
   final VoidCallback? onDiscard;
   final VoidCallback? onClearSelection;
-
-  const GameControls({
-    super.key,
-    required this.gameState,
-    required this.onDrawFromDeck,
-    this.onDrawFromDiscard,
-    this.onPlaySet,
-    this.onPlayRun,
-    this.onDiscard,
-    this.onClearSelection,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +39,7 @@ class GameControls extends StatelessWidget {
         children: [
           Text(
             'Phase: ${_getPhaseText()}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),

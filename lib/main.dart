@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+
 import 'firebase_options.dart';
 import 'rummy_500_screen.dart';
 import 'screens/game_lobby_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -35,7 +34,9 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         // Handle /join/ROOMCODE URLs
         if (settings.name != null && settings.name!.startsWith('/join/')) {
-          final roomCode = settings.name!.substring(6).toUpperCase(); // Extract and uppercase room code
+          final roomCode = settings.name!
+              .substring(6)
+              .toUpperCase(); // Extract and uppercase room code
           return MaterialPageRoute(
             builder: (context) => GameLobbyScreen(joinRoomId: roomCode),
             settings: settings,
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({required this.title, super.key});
 
   final String title;
 
@@ -82,26 +83,16 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.style,
-              size: 100,
-              color: Colors.deepPurple,
-            ),
+            const Icon(Icons.style, size: 100, color: Colors.deepPurple),
             const SizedBox(height: 20),
             const Text(
               'Cardly',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             const Text(
               'Play Card Games Online',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const SizedBox(height: 60),
             ElevatedButton.icon(

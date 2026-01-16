@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+
 import '../models/playing_card.dart';
 
 class CardWidget extends StatelessWidget {
-  final PlayingCard card;
-  final bool isSelected;
-  final VoidCallback? onTap;
-  final double width;
-  final double height;
-  final bool faceDown;
-
   const CardWidget({
-    super.key,
     required this.card,
+    super.key,
     this.isSelected = false,
     this.onTap,
     this.width = 60,
     this.height = 90,
     this.faceDown = false,
   });
+  final PlayingCard card;
+  final bool isSelected;
+  final VoidCallback? onTap;
+  final double width;
+  final double height;
+  final bool faceDown;
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +33,11 @@ class CardWidget extends StatelessWidget {
             width: isSelected ? 3 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 4,
-              offset: const Offset(2, 2),
+              offset: Offset(2, 2),
             ),
           ],
         ),
@@ -60,11 +60,7 @@ class CardWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.star,
-              color: Colors.purple,
-              size: width * 0.4,
-            ),
+            Icon(Icons.star, color: Colors.purple, size: width * 0.4),
             Text(
               'JOKER',
               style: TextStyle(
@@ -152,6 +148,15 @@ class CardWidget extends StatelessWidget {
 }
 
 class CardStackWidget extends StatelessWidget {
+  const CardStackWidget({
+    required this.cards,
+    required this.label,
+    super.key,
+    this.onTap,
+    this.cardWidth = 60,
+    this.cardHeight = 90,
+    this.faceDown = true,
+  });
   final List<PlayingCard> cards;
   final VoidCallback? onTap;
   final String label;
@@ -159,26 +164,13 @@ class CardStackWidget extends StatelessWidget {
   final double cardHeight;
   final bool faceDown;
 
-  const CardStackWidget({
-    super.key,
-    required this.cards,
-    this.onTap,
-    required this.label,
-    this.cardWidth = 60,
-    this.cardHeight = 90,
-    this.faceDown = true,
-  });
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Container(
             width: cardWidth,
@@ -188,9 +180,7 @@ class CardStackWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: cards.isEmpty
-                ? const Center(
-                    child: Icon(Icons.close, color: Colors.grey),
-                  )
+                ? const Center(child: Icon(Icons.close, color: Colors.grey))
                 : Stack(
                     children: [
                       if (cards.length > 2)
@@ -225,10 +215,7 @@ class CardStackWidget extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 4),
-          Text(
-            '${cards.length} cards',
-            style: const TextStyle(fontSize: 12),
-          ),
+          Text('${cards.length} cards', style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../models/game_room.dart';
-import '../models/playing_card.dart';
 import '../services/firebase_game_service.dart';
 import '../widgets/card_widget.dart';
-import '../widgets/player_hand.dart';
 import '../widgets/discard_pile_widget.dart';
-import '../widgets/meld_widget.dart';
+import '../widgets/player_hand.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
-  final String roomId;
-  final String playerId;
-  final bool isHost;
-
   const MultiplayerGameScreen({
-    super.key,
     required this.roomId,
     required this.playerId,
     required this.isHost,
+    super.key,
   });
+  final String roomId;
+  final String playerId;
+  final bool isHost;
 
   @override
   State<MultiplayerGameScreen> createState() => _MultiplayerGameScreenState();
@@ -28,7 +26,7 @@ class MultiplayerGameScreen extends StatefulWidget {
 class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
   final FirebaseGameService _gameService = FirebaseGameService();
   GameRoom? _gameRoom;
-  List<int> _selectedHandIndices = [];
+  final List<int> _selectedHandIndices = [];
   bool _showShareDialog = false;
 
   @override
@@ -95,17 +93,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
   Future<void> _handleDrawFromDeck() async {
     if (!_isMyTurn) return;
     await _gameService.drawFromDeck(widget.roomId, widget.playerId);
-    setState(() {
-      _selectedHandIndices.clear();
-    });
+    setState(_selectedHandIndices.clear);
   }
 
   Future<void> _handleDrawFromDiscard() async {
     if (!_isMyTurn) return;
     await _gameService.drawFromDiscard(widget.roomId, widget.playerId);
-    setState(() {
-      _selectedHandIndices.clear();
-    });
+    setState(_selectedHandIndices.clear);
   }
 
   Future<void> _handlePlaySet() async {
@@ -117,9 +111,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
       'set',
     );
     if (success) {
-      setState(() {
-        _selectedHandIndices.clear();
-      });
+      setState(_selectedHandIndices.clear);
     }
   }
 
@@ -132,9 +124,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
       'run',
     );
     if (success) {
-      setState(() {
-        _selectedHandIndices.clear();
-      });
+      setState(_selectedHandIndices.clear);
     }
   }
 
@@ -147,15 +137,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
       widget.playerId,
       _selectedHandIndices.first,
     );
-    setState(() {
-      _selectedHandIndices.clear();
-    });
+    setState(_selectedHandIndices.clear);
   }
 
   void _handleClearSelection() {
-    setState(() {
-      _selectedHandIndices.clear();
-    });
+    setState(_selectedHandIndices.clear);
   }
 
   @override
@@ -165,23 +151,15 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Error'),
-            ),
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
+            appBar: AppBar(title: const Text('Error')),
+            body: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
 
         if (!snapshot.hasData) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Loading...'),
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: AppBar(title: const Text('Loading...')),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -189,12 +167,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
 
         if (_gameRoom == null) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Game Not Found'),
-            ),
-            body: const Center(
-              child: Text('This game room no longer exists'),
-            ),
+            appBar: AppBar(title: const Text('Game Not Found')),
+            body: const Center(child: Text('This game room no longer exists')),
           );
         }
 
@@ -244,10 +218,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
               ),
               child: Column(
                 children: [
-                  const Text(
-                    'Room Code:',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  const Text('Room Code:', style: TextStyle(fontSize: 16)),
                   const SizedBox(height: 10),
                   Text(
                     widget.roomId,
@@ -284,8 +255,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
   }
 
   Widget _buildFinishedScreen() {
-    final winner =
-        _gameRoom!.players.reduce((a, b) => a.score > b.score ? a : b);
+    final winner = _gameRoom!.players.reduce(
+      (a, b) => a.score > b.score ? a : b,
+    );
     final isWinner = winner.playerId == widget.playerId;
 
     return Scaffold(
@@ -334,11 +306,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
     final opponent = _opponentPlayer;
 
     if (currentPlayer == null || opponent == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text('Loading players...'),
-        ),
-      );
+      return const Scaffold(body: Center(child: Text('Loading players...')));
     }
 
     return Scaffold(
@@ -381,7 +349,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -392,12 +360,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                             cards: _gameRoom!.deckCards
                                 .map((c) => c.toPlayingCard())
                                 .toList(),
-                            onTap: _isMyTurn &&
-                                    _gameRoom!.currentPhase == 'draw'
+                            onTap:
+                                _isMyTurn && _gameRoom!.currentPhase == 'draw'
                                 ? _handleDrawFromDeck
                                 : null,
                             label: 'Draw Pile',
-                            faceDown: true,
                           ),
                           const SizedBox(width: 20),
                           Expanded(
@@ -405,8 +372,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                               discardPile: _gameRoom!.discardPile
                                   .map((c) => c.toPlayingCard())
                                   .toList(),
-                              onDiscardTap: _isMyTurn &&
-                                      _gameRoom!.currentPhase == 'draw'
+                              onDiscardTap:
+                                  _isMyTurn && _gameRoom!.currentPhase == 'draw'
                                   ? (index) => _handleDrawFromDiscard()
                                   : null,
                             ),
@@ -449,7 +416,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
     );
   }
 
-  Widget _buildScoreDisplay(PlayerData player, {required bool isCurrentPlayer}) {
+  Widget _buildScoreDisplay(
+    PlayerData player, {
+    required bool isCurrentPlayer,
+  }) {
     return Column(
       children: [
         Row(
@@ -483,8 +453,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
           style: TextStyle(
             fontSize: 18,
             color: player.score >= 500 ? Colors.green : Colors.black,
-            fontWeight:
-                player.score >= 500 ? FontWeight.bold : FontWeight.normal,
+            fontWeight: player.score >= 500
+                ? FontWeight.bold
+                : FontWeight.normal,
           ),
         ),
       ],
@@ -527,7 +498,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                     itemCount: meldData.cards.length,
                     itemBuilder: (context, index) {
                       return Padding(
-                        padding: const EdgeInsets.only(right: 4.0),
+                        padding: const EdgeInsets.only(right: 4),
                         child: CardWidget(
                           card: meldData.cards[index].toPlayingCard(),
                           width: 50,
@@ -598,8 +569,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed:
-                          _selectedHandIndices.length >= 3 ? _handlePlaySet : null,
+                      onPressed: _selectedHandIndices.length >= 3
+                          ? _handlePlaySet
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -610,8 +582,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed:
-                          _selectedHandIndices.length >= 3 ? _handlePlayRun : null,
+                      onPressed: _selectedHandIndices.length >= 3
+                          ? _handlePlayRun
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,

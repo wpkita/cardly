@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../screens/game_lobby_screen.dart';
 
 class UrlHandler {

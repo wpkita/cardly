@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'models/playing_card.dart';
 import 'models/rummy_game_state.dart';
-import 'widgets/card_widget.dart';
-import 'widgets/player_hand.dart';
-import 'widgets/discard_pile_widget.dart';
-import 'widgets/meld_widget.dart';
-import 'widgets/game_controls.dart';
 import 'screens/game_lobby_screen.dart';
+import 'widgets/card_widget.dart';
+import 'widgets/discard_pile_widget.dart';
+import 'widgets/game_controls.dart';
+import 'widgets/meld_widget.dart';
+import 'widgets/player_hand.dart';
 
 class Rummy500Screen extends StatefulWidget {
   const Rummy500Screen({super.key});
@@ -106,9 +107,7 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
 
   void _checkComputerTurn() {
     if (gameState.currentPlayerIndex == 1 && !gameState.isGameOver) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _playComputerTurn();
-      });
+      Future.delayed(const Duration(milliseconds: 500), _playComputerTurn);
     }
   }
 
@@ -164,22 +163,15 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.style,
-                size: 100,
-                color: Colors.deepPurple,
-              ),
+              const Icon(Icons.style, size: 100, color: Colors.deepPurple),
               const SizedBox(height: 20),
               const Text(
                 'Rummy 500',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               const Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(20),
                 child: Text(
                   'A classic card game where you try to reach 500 points by forming melds (sets and runs) of cards.',
                   textAlign: TextAlign.center,
@@ -188,7 +180,7 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
               ),
               const SizedBox(height: 10),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30.0),
+                padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Text(
                   'How to Play:\n'
                   '• Draw from deck or discard pile\n'
@@ -288,7 +280,7 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -297,12 +289,12 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
                         children: [
                           CardStackWidget(
                             cards: gameState.deck.cards,
-                            onTap: gameState.currentPhase == GamePhase.draw &&
+                            onTap:
+                                gameState.currentPhase == GamePhase.draw &&
                                     gameState.currentPlayerIndex == 0
                                 ? _handleDrawFromDeck
                                 : null,
                             label: 'Draw Pile',
-                            faceDown: true,
                           ),
                           const SizedBox(width: 20),
                           Expanded(
@@ -310,9 +302,9 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
                               discardPile: gameState.discardPile,
                               onDiscardTap:
                                   gameState.currentPhase == GamePhase.draw &&
-                                          gameState.currentPlayerIndex == 0
-                                      ? (index) => _handleDrawFromDiscard()
-                                      : null,
+                                      gameState.currentPlayerIndex == 0
+                                  ? (index) => _handleDrawFromDiscard()
+                                  : null,
                             ),
                           ),
                         ],
@@ -371,17 +363,15 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
   Widget _buildScoreDisplay(Player player) {
     return Column(
       children: [
-        Text(
-          player.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold)),
         Text(
           '${player.score} pts',
           style: TextStyle(
             fontSize: 18,
             color: player.score >= 500 ? Colors.green : Colors.black,
-            fontWeight:
-                player.score >= 500 ? FontWeight.bold : FontWeight.normal,
+            fontWeight: player.score >= 500
+                ? FontWeight.bold
+                : FontWeight.normal,
           ),
         ),
       ],

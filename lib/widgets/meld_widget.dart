@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+
 import '../models/rummy_game_state.dart';
 import 'card_widget.dart';
 
 class MeldWidget extends StatelessWidget {
+  const MeldWidget({
+    required this.meld,
+    required this.playerIndex,
+    required this.meldIndex,
+    super.key,
+    this.onCardTap,
+  });
   final Meld meld;
   final int playerIndex;
   final int meldIndex;
   final Function(int, int)? onCardTap;
-
-  const MeldWidget({
-    super.key,
-    required this.meld,
-    required this.playerIndex,
-    required this.meldIndex,
-    this.onCardTap,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class MeldWidget extends StatelessWidget {
               itemCount: meld.cards.length,
               itemBuilder: (context, cardIndex) {
                 return Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
+                  padding: const EdgeInsets.only(right: 4),
                   child: CardWidget(
                     card: meld.cards[cardIndex],
                     width: 50,
@@ -77,18 +77,17 @@ class MeldWidget extends StatelessWidget {
 }
 
 class MeldsDisplay extends StatelessWidget {
+  const MeldsDisplay({
+    required this.melds,
+    required this.playerName,
+    required this.playerIndex,
+    super.key,
+    this.onMeldTap,
+  });
   final List<Meld> melds;
   final String playerName;
   final int playerIndex;
   final Function(int, int)? onMeldTap;
-
-  const MeldsDisplay({
-    super.key,
-    required this.melds,
-    required this.playerName,
-    required this.playerIndex,
-    this.onMeldTap,
-  });
 
   @override
   Widget build(BuildContext context) {

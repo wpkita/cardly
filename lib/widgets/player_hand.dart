@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+
 import '../models/playing_card.dart';
 import 'card_widget.dart';
 
 class PlayerHand extends StatelessWidget {
+  const PlayerHand({
+    required this.hand,
+    required this.selectedIndices,
+    required this.onCardTap,
+    super.key,
+    this.isCurrentPlayer = true,
+  });
   final List<PlayingCard> hand;
   final List<int> selectedIndices;
   final Function(int) onCardTap;
   final bool isCurrentPlayer;
-
-  const PlayerHand({
-    super.key,
-    required this.hand,
-    required this.selectedIndices,
-    required this.onCardTap,
-    this.isCurrentPlayer = true,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class PlayerHand extends StatelessWidget {
         itemCount: hand.length,
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 8),
             child: CardWidget(
               card: hand[index],
               isSelected: selectedIndices.contains(index),

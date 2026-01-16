@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
-import '../models/game_room.dart';
+
 import '../services/firebase_game_service.dart';
 import 'multiplayer_game_screen.dart';
 
 class GameLobbyScreen extends StatefulWidget {
-  final String? joinRoomId;
-
   const GameLobbyScreen({super.key, this.joinRoomId});
+  final String? joinRoomId;
 
   @override
   State<GameLobbyScreen> createState() => _GameLobbyScreenState();
@@ -150,23 +147,16 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> {
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.people,
-                    size: 100,
-                    color: Colors.deepPurple,
-                  ),
+                  const Icon(Icons.people, size: 100, color: Colors.deepPurple),
                   const SizedBox(height: 30),
                   const Text(
                     'Join Rummy 500 Game',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
@@ -279,22 +269,15 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(
-                Icons.people,
-                size: 80,
-                color: Colors.deepPurple,
-              ),
+              const Icon(Icons.people, size: 80, color: Colors.deepPurple),
               const SizedBox(height: 20),
               const Text(
                 'Play Rummy 500 Online',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
@@ -318,10 +301,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> {
               const SizedBox(height: 20),
               const Text(
                 'Create New Game',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -353,10 +333,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> {
               const SizedBox(height: 20),
               const Text(
                 'Join Existing Game',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
