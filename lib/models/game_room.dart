@@ -52,17 +52,17 @@ class GameRoom {
       state: GameRoomState.values.firstWhere(
         (e) => e.toString().split('.').last == json['state'],
       ),
-      deckCards: (json['deckCards'] as List)
-          .map((c) => CardData.fromJson(c))
+      deckCards: (json['deckCards'] as List? ?? [])
+          .map((c) => CardData.fromJson(c as Map))
           .toList(),
-      discardPile: (json['discardPile'] as List)
-          .map((c) => CardData.fromJson(c))
+      discardPile: (json['discardPile'] as List? ?? [])
+          .map((c) => CardData.fromJson(c as Map))
           .toList(),
-      players: (json['players'] as List)
-          .map((p) => PlayerData.fromJson(p))
+      players: (json['players'] as List? ?? [])
+          .map((p) => PlayerData.fromJson(p as Map))
           .toList(),
-      currentPlayerIndex: json['currentPlayerIndex'] as int,
-      currentPhase: json['currentPhase'] as String,
+      currentPlayerIndex: json['currentPlayerIndex'] as int? ?? 0,
+      currentPhase: json['currentPhase'] as String? ?? 'draw',
       message: json['message'] as String?,
     );
   }
@@ -153,8 +153,12 @@ class PlayerData {
     return PlayerData(
       playerId: json['playerId'] as String,
       name: json['name'] as String,
-      hand: (json['hand'] as List).map((c) => CardData.fromJson(c)).toList(),
-      melds: (json['melds'] as List).map((m) => MeldData.fromJson(m)).toList(),
+      hand: (json['hand'] as List? ?? [])
+          .map((c) => CardData.fromJson(c as Map))
+          .toList(),
+      melds: (json['melds'] as List? ?? [])
+          .map((m) => MeldData.fromJson(m as Map))
+          .toList(),
       score: json['score'] as int? ?? 0,
     );
   }
@@ -178,7 +182,9 @@ class MeldData {
 
   factory MeldData.fromJson(Map<dynamic, dynamic> json) {
     return MeldData(
-      cards: (json['cards'] as List).map((c) => CardData.fromJson(c)).toList(),
+      cards: (json['cards'] as List? ?? [])
+          .map((c) => CardData.fromJson(c as Map))
+          .toList(),
       type: json['type'] as String,
     );
   }

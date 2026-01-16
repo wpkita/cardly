@@ -340,6 +340,6 @@ class FirebaseGameService {
   }
 
   String getGameUrl(String roomId) {
-    return 'https://cardly.app/join/$roomId';
+    return 'https://cardly.kita.llc/join/$roomId';
   }
 }

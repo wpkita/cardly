@@ -18,7 +18,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Play Rummy 500 online with friends!">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -29,8 +29,19 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>cardly</title>
+  <title>Cardly - Rummy 500</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Handle URL routing for Flutter web
+    // This ensures /join/ROOMCODE URLs work properly
+    window.addEventListener('load', function() {
+      if (window.location.pathname !== '/') {
+        // Store the path for Flutter to handle
+        window.flutterRoute = window.location.pathname;
+      }
+    });
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
