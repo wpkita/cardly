@@ -1,0 +1,66 @@
+{
+  // Dart & Flutter
+  "dart.flutterSdkPath": null,
+  "dart.lineLength": 80,
+  "dart.debugExternalPackageLibraries": false,
+  "dart.debugSdkLibraries": false,
+
+  // Editor - Format on save
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // Dart-specific editor settings
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [80],
+    "editor.selectionHighlight": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+
+  // File associations
+  "files.associations": {
+    "*.dart": "dart"
+  },
+
+  // Exclude files from search
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/.git": true,
+    "**/.idea": true,
+    "**/build": true
+  },
+
+  // Search settings
+  "search.exclude": {
+    "**/.dart_tool": true,
+    "**/.git": true,
+    "**/build": true,
+    "**/*.freezed.dart": true,
+    "**/*.g.dart": true
+  },
+
+  // File watcher
+  "files.watcherExclude": {
+    "**/.dart_tool/**": true,
+    "**/build/**": true
+  },
+
+  // Recommendations
+  "editor.minimap.enabled": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+
+  // Terminal
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // Git
+  "git.ignoreWindowsGit27Warning": true,
+  "cSpell.words": ["cardly"]
+}
