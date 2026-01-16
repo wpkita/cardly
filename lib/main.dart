@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'rummy_500_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -108,6 +109,25 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Rummy500Screen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.style),
+              label: const Text('Play Rummy 500'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+              ),
             ),
           ],
         ),
