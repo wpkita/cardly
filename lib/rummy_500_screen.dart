@@ -6,6 +6,7 @@ import 'widgets/player_hand.dart';
 import 'widgets/discard_pile_widget.dart';
 import 'widgets/meld_widget.dart';
 import 'widgets/game_controls.dart';
+import 'screens/game_lobby_screen.dart';
 
 class Rummy500Screen extends StatefulWidget {
   const Rummy500Screen({super.key});
@@ -199,9 +200,30 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
               ),
               const SizedBox(height: 40),
               ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const GameLobbyScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.people),
+                label: const Text('Play Online (Multiplayer)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton.icon(
                 onPressed: _startGame,
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Start Game'),
+                icon: const Icon(Icons.computer),
+                label: const Text('Play vs Computer'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 30,
