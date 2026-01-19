@@ -17,10 +17,9 @@ enum Rank {
 }
 
 class PlayingCard {
-  PlayingCard({required this.suit, required this.rank, this.isJoker = false});
+  PlayingCard({required this.suit, required this.rank});
   final Suit suit;
   final Rank rank;
-  final bool isJoker;
 
   String get suitSymbol {
     switch (suit) {
@@ -68,20 +67,29 @@ class PlayingCard {
 
   bool get isRed => suit == Suit.hearts || suit == Suit.diamonds;
 
-  int get points {
-    if (isJoker) return 15;
+  /// Returns the point value of this card.
+  /// For Ace, pass [aceHigh] = false to get 1 point (when used in A-2-3),
+  /// or true (default) to get 15 points (when used in Q-K-A or in a set).
+  int points({bool aceHigh = true}) {
     switch (rank) {
       case Rank.ace:
-        return 15;
+        return aceHigh ? 15 : 1;
       case Rank.two:
+        return 2;
       case Rank.three:
+        return 3;
       case Rank.four:
+        return 4;
       case Rank.five:
-      case Rank.six:
-      case Rank.seven:
-      case Rank.eight:
-      case Rank.nine:
         return 5;
+      case Rank.six:
+        return 6;
+      case Rank.seven:
+        return 7;
+      case Rank.eight:
+        return 8;
+      case Rank.nine:
+        return 9;
       case Rank.ten:
       case Rank.jack:
       case Rank.queen:
@@ -96,14 +104,13 @@ class PlayingCard {
       other is PlayingCard &&
           runtimeType == other.runtimeType &&
           suit == other.suit &&
-          rank == other.rank &&
-          isJoker == other.isJoker;
+          rank == other.rank;
 
   @override
-  int get hashCode => suit.hashCode ^ rank.hashCode ^ isJoker.hashCode;
+  int get hashCode => suit.hashCode ^ rank.hashCode;
 
   @override
-  String toString() => isJoker ? 'Joker' : '$rankSymbol$suitSymbol';
+  String toString() => '$rankSymbol$suitSymbol';
 }
 
 class Deck {
@@ -115,17 +122,12 @@ class Deck {
   void _initialize() {
     cards.clear();
 
+    // Standard 52-card pack
     for (final suit in Suit.values) {
       for (final rank in Rank.values) {
         cards.add(PlayingCard(suit: suit, rank: rank));
-        cards.add(PlayingCard(suit: suit, rank: rank));
       }
     }
-
-    cards.add(PlayingCard(suit: Suit.hearts, rank: Rank.ace, isJoker: true));
-    cards.add(PlayingCard(suit: Suit.spades, rank: Rank.ace, isJoker: true));
-    cards.add(PlayingCard(suit: Suit.diamonds, rank: Rank.ace, isJoker: true));
-    cards.add(PlayingCard(suit: Suit.clubs, rank: Rank.ace, isJoker: true));
   }
 
   void shuffle() {

@@ -105,6 +105,12 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
     });
   }
 
+  void _handleUndoDiscardDraw() {
+    setState(() {
+      gameState.undoDiscardDraw();
+    });
+  }
+
   void _checkComputerTurn() {
     if (gameState.currentPlayerIndex == 1 && !gameState.isGameOver) {
       Future.delayed(const Duration(milliseconds: 500), _playComputerTurn);
@@ -333,6 +339,7 @@ class _Rummy500ScreenState extends State<Rummy500Screen> {
                           onPlayRun: _handlePlayRun,
                           onDiscard: _handleDiscard,
                           onClearSelection: _handleClearSelection,
+                          onUndoDiscardDraw: _handleUndoDiscardDraw,
                         ),
                       const SizedBox(height: 16),
                       const Text(

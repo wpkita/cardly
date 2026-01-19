@@ -13,7 +13,9 @@ class GameRoom {
     this.currentPlayerIndex = 0,
     this.currentPhase = 'draw',
     this.message,
-  });
+    this.mustUseCard,
+    List<CardData>? cardsDrawnFromDiscard,
+  }) : cardsDrawnFromDiscard = cardsDrawnFromDiscard ?? [];
 
   factory GameRoom.fromJson(Map<dynamic, dynamic> json) {
     return GameRoom(
@@ -36,6 +38,14 @@ class GameRoom {
       currentPlayerIndex: json['currentPlayerIndex'] as int? ?? 0,
       currentPhase: json['currentPhase'] as String? ?? 'draw',
       message: json['message'] as String?,
+      mustUseCard: json['mustUseCard'] != null &&
+              json['mustUseCard'] is Map &&
+              (json['mustUseCard'] as Map).containsKey('suit')
+          ? CardData.fromJson(json['mustUseCard'] as Map)
+          : null,
+      cardsDrawnFromDiscard: (json['cardsDrawnFromDiscard'] as List? ?? [])
+          .map((c) => CardData.fromJson(c as Map))
+          .toList(),
     );
   }
   final String roomId;
@@ -49,6 +59,10 @@ class GameRoom {
   int currentPlayerIndex;
   String currentPhase;
   String? message;
+  /// Card drawn from discard pile that must be used immediately
+  CardData? mustUseCard;
+  /// All cards drawn from discard pile (for undo)
+  List<CardData> cardsDrawnFromDiscard;
 
   Map<String, dynamic> toJson() {
     return {
@@ -63,6 +77,9 @@ class GameRoom {
       'currentPlayerIndex': currentPlayerIndex,
       'currentPhase': currentPhase,
       'message': message,
+      'mustUseCard': mustUseCard?.toJson(),
+      'cardsDrawnFromDiscard':
+          cardsDrawnFromDiscard.map((c) => c.toJson()).toList(),
     };
   }
 }
@@ -70,35 +87,22 @@ class GameRoom {
 enum GameRoomState { waiting, playing, finished }
 
 class CardData {
-  CardData({required this.suit, required this.rank, this.isJoker = false});
+  CardData({required this.suit, required this.rank});
 
   factory CardData.fromJson(Map<dynamic, dynamic> json) {
     return CardData(
       suit: json['suit'] as String,
       rank: json['rank'] as String,
-      isJoker: json['isJoker'] as bool? ?? false,
     );
   }
   final String suit;
   final String rank;
-  final bool isJoker;
 
   Map<String, dynamic> toJson() {
-    return {'suit': suit, 'rank': rank, 'isJoker': isJoker};
+    return {'suit': suit, 'rank': rank};
   }
 
   PlayingCard toPlayingCard() {
-    if (isJoker) {
-      return PlayingCard(
-        suit: Suit.values.firstWhere(
-          (s) => s.toString().split('.').last == suit,
-        ),
-        rank: Rank.values.firstWhere(
-          (r) => r.toString().split('.').last == rank,
-        ),
-        isJoker: true,
-      );
-    }
     return PlayingCard(
       suit: Suit.values.firstWhere((s) => s.toString().split('.').last == suit),
       rank: Rank.values.firstWhere((r) => r.toString().split('.').last == rank),
@@ -109,9 +113,19 @@ class CardData {
     return CardData(
       suit: card.suit.toString().split('.').last,
       rank: card.rank.toString().split('.').last,
-      isJoker: card.isJoker,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CardData &&
+          runtimeType == other.runtimeType &&
+          suit == other.suit &&
+          rank == other.rank;
+
+  @override
+  int get hashCode => suit.hashCode ^ rank.hashCode;
 }
 
 class PlayerData {

@@ -55,25 +55,6 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildCardFace() {
-    if (card.isJoker) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.star, color: Colors.purple, size: width * 0.4),
-            Text(
-              'JOKER',
-              style: TextStyle(
-                fontSize: width * 0.15,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     final color = card.isRed ? Colors.red : Colors.black;
 
     return Stack(

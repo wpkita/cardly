@@ -96,9 +96,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
     setState(_selectedHandIndices.clear);
   }
 
-  Future<void> _handleDrawFromDiscard() async {
+  Future<void> _handleDrawFromDiscard(int discardIndex) async {
     if (!_isMyTurn) return;
-    await _gameService.drawFromDiscard(widget.roomId, widget.playerId);
+    await _gameService.drawFromDiscard(
+      widget.roomId,
+      widget.playerId,
+      discardIndex,
+    );
     setState(_selectedHandIndices.clear);
   }
 
@@ -141,6 +145,12 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
   }
 
   void _handleClearSelection() {
+    setState(_selectedHandIndices.clear);
+  }
+
+  Future<void> _handleUndoDiscardDraw() async {
+    if (!_isMyTurn) return;
+    await _gameService.undoDiscardDraw(widget.roomId, widget.playerId);
     setState(_selectedHandIndices.clear);
   }
 
@@ -374,7 +384,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                                   .toList(),
                               onDiscardTap:
                                   _isMyTurn && _gameRoom!.currentPhase == 'draw'
-                                  ? (index) => _handleDrawFromDiscard()
+                                  ? _handleDrawFromDiscard
                                   : null,
                             ),
                           ),
@@ -553,17 +563,48 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: _gameRoom!.discardPile.isNotEmpty
-                  ? _handleDrawFromDiscard
+                  ? () => _handleDrawFromDiscard(_gameRoom!.discardPile.length - 1)
                   : null,
               icon: const Icon(Icons.layers),
-              label: const Text('Draw from Discard'),
+              label: const Text('Draw Top Discard'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
               ),
             ),
+            const SizedBox(height: 4),
+            const Text(
+              'Or tap a card in the discard pile to draw from there',
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+            ),
           ],
           if (!isDrawPhase) ...[
+            // Show undo button if drew from discard but haven't used the card
+            if (_gameRoom!.cardsDrawnFromDiscard.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'You must use the drawn card in a meld!',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _handleUndoDiscardDraw,
+                icon: const Icon(Icons.undo),
+                label: const Text('Undo & Restart Turn'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (hasSelection) ...[
               Row(
                 children: [
@@ -599,7 +640,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _selectedHandIndices.length == 1
+                      onPressed: _selectedHandIndices.length == 1 &&
+                              _gameRoom!.cardsDrawnFromDiscard.isEmpty
                           ? _handleDiscard
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -634,10 +676,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
                 '• 3+ cards to play a Set or Run',
                 style: TextStyle(fontSize: 12),
               ),
-              const Text(
-                '• 1 card to discard and end turn',
-                style: TextStyle(fontSize: 12),
-              ),
+              if (_gameRoom!.cardsDrawnFromDiscard.isEmpty)
+                const Text(
+                  '• 1 card to discard and end turn',
+                  style: TextStyle(fontSize: 12),
+                ),
             ],
           ],
         ],

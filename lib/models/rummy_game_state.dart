@@ -7,8 +7,21 @@ class Meld {
   final List<PlayingCard> cards;
   final MeldType type;
 
+  /// Returns the total point value of this meld.
+  /// For runs, Ace is scored as 1 point if low (A-2-3) or 15 if high (Q-K-A).
   int get points {
-    return cards.fold(0, (sum, card) => sum + card.points);
+    if (type == MeldType.run) {
+      return cards.fold(0, (sum, card) {
+        if (card.rank == Rank.ace) {
+          // Check if ace is used as low (A-2-3) or high (Q-K-A)
+          final hasTwo = cards.any((c) => c.rank == Rank.two);
+          final hasKing = cards.any((c) => c.rank == Rank.king);
+          return sum + card.points(aceHigh: hasKing && !hasTwo);
+        }
+        return sum + card.points();
+      });
+    }
+    return cards.fold(0, (sum, card) => sum + card.points());
   }
 
   bool isValid() {
@@ -27,36 +40,63 @@ class Meld {
     final suits = <Suit>{};
 
     for (final card in cards) {
-      if (!card.isJoker && card.rank != rank) return false;
-      if (!card.isJoker) suits.add(card.suit);
+      if (card.rank != rank) return false;
+      suits.add(card.suit);
     }
 
-    return suits.length == cards.where((c) => !c.isJoker).length;
+    // All cards must be same rank with different suits
+    return suits.length == cards.length && cards.length <= 4;
   }
 
   bool _isValidRun() {
     if (cards.isEmpty) return false;
 
-    final suit = cards
-        .firstWhere((c) => !c.isJoker, orElse: () => cards.first)
-        .suit;
-    final nonJokers = cards.where((c) => !c.isJoker).toList();
-
-    for (final card in nonJokers) {
+    // All cards must be the same suit
+    final suit = cards.first.suit;
+    for (final card in cards) {
       if (card.suit != suit) return false;
     }
 
-    final sortedCards = List<PlayingCard>.from(cards);
-    sortedCards.sort((a, b) => a.rank.index.compareTo(b.rank.index));
+    // Get rank indices
+    final rankIndices = cards.map((c) => c.rank.index).toList();
+    rankIndices.sort();
 
-    int expectedIndex = sortedCards.first.rank.index;
-    for (var i = 0; i < sortedCards.length; i++) {
-      if (!sortedCards[i].isJoker) {
-        if (sortedCards[i].rank.index != expectedIndex) return false;
+    // Check for ace (index 0) - it can be high (after king) or low (before 2)
+    final hasAce = rankIndices.contains(0);
+    final hasKing = rankIndices.contains(12); // King is index 12
+    final hasTwo = rankIndices.contains(1); // Two is index 1
+
+    if (hasAce) {
+      // If ace is present with king but no two, treat ace as high (index 13)
+      if (hasKing && !hasTwo) {
+        // Try ace-high sequence (e.g., Q-K-A)
+        final aceHighIndices = rankIndices.map((i) => i == 0 ? 13 : i).toList();
+        aceHighIndices.sort();
+        if (_isConsecutive(aceHighIndices)) return true;
       }
-      expectedIndex++;
+      // If ace is present with two but no king, treat ace as low (index 0)
+      if (hasTwo && !hasKing) {
+        // Try ace-low sequence (e.g., A-2-3)
+        if (_isConsecutive(rankIndices)) return true;
+      }
+      // If ace is present with both king and two, it's invalid (no wrap-around)
+      if (hasKing && hasTwo) return false;
+      // If ace is alone or with neither king nor two, check as low
+      if (!hasKing && !hasTwo) {
+        if (_isConsecutive(rankIndices)) return true;
+      }
+    } else {
+      // No ace, just check consecutive
+      if (_isConsecutive(rankIndices)) return true;
     }
 
+    return false;
+  }
+
+  bool _isConsecutive(List<int> indices) {
+    for (var i = 1; i < indices.length; i++) {
+      if (indices[i] != indices[i - 1] + 1) return false;
+    }
     return true;
   }
 }
@@ -77,7 +117,7 @@ class Player {
   int score;
 
   int get handPoints {
-    return hand.fold(0, (sum, card) => sum + card.points);
+    return hand.fold(0, (sum, card) => sum + card.points());
   }
 
   int get meldPoints {
@@ -105,7 +145,10 @@ class RummyGameState {
     this.selectedDiscardIndex,
     List<int>? selectedHandIndices,
     this.message,
-  }) : selectedHandIndices = selectedHandIndices ?? [];
+    this.mustUseCard,
+    List<PlayingCard>? cardsDrawnFromDiscard,
+  })  : selectedHandIndices = selectedHandIndices ?? [],
+        cardsDrawnFromDiscard = cardsDrawnFromDiscard ?? [];
   final Deck deck;
   final List<PlayingCard> discardPile;
   final List<Player> players;
@@ -115,13 +158,21 @@ class RummyGameState {
   int? selectedDiscardIndex;
   List<int> selectedHandIndices;
   String? message;
+  /// When drawing from discard pile, this card must be used immediately
+  /// (melded or laid off) before the player can discard.
+  PlayingCard? mustUseCard;
+  /// Cards drawn from the discard pile (for undo functionality)
+  List<PlayingCard> cardsDrawnFromDiscard;
 
   Player get currentPlayer => players[currentPlayerIndex];
 
   bool get isGameOver => players.any((p) => p.score >= 500);
 
   void dealCards() {
-    for (var i = 0; i < 13; i++) {
+    // Deal 7 cards per player normally, 13 cards in 2-player game
+    final cardsPerPlayer = players.length == 2 ? 13 : 7;
+
+    for (var i = 0; i < cardsPerPlayer; i++) {
       for (final player in players) {
         final card = deck.draw();
         if (card != null) {
@@ -158,6 +209,17 @@ class RummyGameState {
     if (discardPile.isEmpty) return;
     if (discardIndex < 0 || discardIndex >= discardPile.length) return;
 
+    // The selected card that must be immediately used
+    final selectedCard = discardPile[discardIndex];
+    mustUseCard = selectedCard;
+
+    // Track the cards drawn for undo functionality
+    cardsDrawnFromDiscard.clear();
+    for (var i = discardIndex; i < discardPile.length; i++) {
+      cardsDrawnFromDiscard.add(discardPile[i]);
+    }
+
+    // Take all cards from the selected one to the top
     for (var i = discardPile.length - 1; i >= discardIndex; i--) {
       currentPlayer.hand.add(discardPile[i]);
     }
@@ -165,7 +227,32 @@ class RummyGameState {
     discardPile.removeRange(discardIndex, discardPile.length);
     currentPlayer.sortHand();
     currentPhase = GamePhase.play;
-    message = 'Drew cards from discard pile. Play melds or discard.';
+    message = 'Drew from discard pile. You must use ${selectedCard.rankSymbol}${selectedCard.suitSymbol} in a meld!';
+  }
+
+  /// Undo drawing from discard pile and restart the turn.
+  /// Only available if mustUseCard is set (drew from discard but haven't used it).
+  bool undoDiscardDraw() {
+    if (mustUseCard == null || cardsDrawnFromDiscard.isEmpty) {
+      message = 'Nothing to undo!';
+      return false;
+    }
+
+    // Remove the drawn cards from hand
+    for (final card in cardsDrawnFromDiscard) {
+      currentPlayer.hand.remove(card);
+    }
+
+    // Put them back on the discard pile in original order
+    discardPile.addAll(cardsDrawnFromDiscard);
+
+    // Reset state
+    cardsDrawnFromDiscard.clear();
+    mustUseCard = null;
+    currentPhase = GamePhase.draw;
+    selectedHandIndices.clear();
+    message = 'Turn restarted. Draw a card.';
+    return true;
   }
 
   bool playMeld(List<int> cardIndices, MeldType type) {
@@ -178,6 +265,11 @@ class RummyGameState {
     if (!meld.isValid()) {
       message = 'Invalid meld!';
       return false;
+    }
+
+    // Check if this meld uses the required card from discard pile
+    if (mustUseCard != null && cards.contains(mustUseCard)) {
+      mustUseCard = null;
     }
 
     cardIndices.sort((a, b) => b.compareTo(a));
@@ -210,6 +302,11 @@ class RummyGameState {
       return false;
     }
 
+    // Check if laying off the required card from discard pile
+    if (mustUseCard != null && card == mustUseCard) {
+      mustUseCard = null;
+    }
+
     meld.cards.add(card);
     currentPlayer.hand.removeAt(handIndex);
     message = 'Card laid off! You can play more or discard.';
@@ -219,6 +316,12 @@ class RummyGameState {
   void discard(int handIndex) {
     if (currentPhase != GamePhase.play) return;
     if (handIndex < 0 || handIndex >= currentPlayer.hand.length) return;
+
+    // Must use the drawn card from discard pile before discarding
+    if (mustUseCard != null) {
+      message = 'You must use ${mustUseCard!.rankSymbol}${mustUseCard!.suitSymbol} in a meld or lay it off first!';
+      return;
+    }
 
     final card = currentPlayer.hand.removeAt(handIndex);
     discardPile.add(card);
@@ -234,6 +337,8 @@ class RummyGameState {
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
     currentPhase = GamePhase.draw;
     drawnCard = null;
+    mustUseCard = null;
+    cardsDrawnFromDiscard.clear();
     selectedHandIndices.clear();
     message = '${currentPlayer.name}\'s turn';
   }
@@ -265,6 +370,8 @@ class RummyGameState {
     currentPlayerIndex = 0;
     currentPhase = GamePhase.draw;
     drawnCard = null;
+    mustUseCard = null;
+    cardsDrawnFromDiscard.clear();
     selectedHandIndices.clear();
 
     dealCards();
@@ -280,6 +387,8 @@ class RummyGameState {
     int? selectedDiscardIndex,
     List<int>? selectedHandIndices,
     String? message,
+    PlayingCard? mustUseCard,
+    List<PlayingCard>? cardsDrawnFromDiscard,
   }) {
     return RummyGameState(
       deck: deck ?? this.deck,
@@ -291,6 +400,8 @@ class RummyGameState {
       selectedDiscardIndex: selectedDiscardIndex ?? this.selectedDiscardIndex,
       selectedHandIndices: selectedHandIndices ?? this.selectedHandIndices,
       message: message ?? this.message,
+      mustUseCard: mustUseCard ?? this.mustUseCard,
+      cardsDrawnFromDiscard: cardsDrawnFromDiscard ?? this.cardsDrawnFromDiscard,
     );
   }
 }

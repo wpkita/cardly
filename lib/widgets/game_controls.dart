@@ -12,6 +12,7 @@ class GameControls extends StatelessWidget {
     this.onPlayRun,
     this.onDiscard,
     this.onClearSelection,
+    this.onUndoDiscardDraw,
   });
   final RummyGameState gameState;
   final VoidCallback onDrawFromDeck;
@@ -20,6 +21,7 @@ class GameControls extends StatelessWidget {
   final VoidCallback? onPlayRun;
   final VoidCallback? onDiscard;
   final VoidCallback? onClearSelection;
+  final VoidCallback? onUndoDiscardDraw;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,32 @@ class GameControls extends StatelessWidget {
             ),
           ],
           if (isPlayPhase) ...[
+            // Show undo button if drew from discard but haven't used the card
+            if (gameState.mustUseCard != null) ...[
+              Container(
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'You must use ${gameState.mustUseCard!.rankSymbol}${gameState.mustUseCard!.suitSymbol} in a meld!',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: onUndoDiscardDraw,
+                icon: const Icon(Icons.undo),
+                label: const Text('Undo & Restart Turn'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (hasSelection) ...[
               Row(
                 children: [
@@ -102,7 +130,8 @@ class GameControls extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: gameState.selectedHandIndices.length == 1
+                      onPressed: gameState.selectedHandIndices.length == 1 &&
+                              gameState.mustUseCard == null
                           ? onDiscard
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -137,10 +166,11 @@ class GameControls extends StatelessWidget {
                 '• 3+ cards to play a Set or Run',
                 style: TextStyle(fontSize: 12),
               ),
-              const Text(
-                '• 1 card to discard and end turn',
-                style: TextStyle(fontSize: 12),
-              ),
+              if (gameState.mustUseCard == null)
+                const Text(
+                  '• 1 card to discard and end turn',
+                  style: TextStyle(fontSize: 12),
+                ),
             ],
           ],
         ],
