@@ -151,6 +151,6 @@ class SignalRGameService implements GameService {
 
   @override
   String getGameUrl(String roomId) {
-    return 'https://cardly.kita.llc/join/$roomId';
+    return 'http://localhost:8081/join/$roomId';
   }
 }

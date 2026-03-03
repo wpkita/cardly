@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider<GameService>(
-      create: (_) => SignalRGameService(baseUrl: 'https://api.cardly.kita.llc'),
+      create: (_) => SignalRGameService(baseUrl: 'http://localhost:8080'),
       child: MaterialApp(
         title: 'Cardly - Rummy 500',
         theme: ThemeData(

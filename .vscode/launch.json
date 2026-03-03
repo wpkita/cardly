@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Cardly Mobile (Chrome)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/mobile/lib/main.dart",
+      "deviceId": "chrome",
+      "args": ["--web-port=8081"]
+    },
+    {
+      "name": "Cardly API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/apps/api/src/Cardly.Api/bin/Debug/net10.0/Cardly.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/apps/api/src/Cardly.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}
