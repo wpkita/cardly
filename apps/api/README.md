@@ -6,7 +6,13 @@
 dotnet run --project src/Cardly.Api
 ```
 
-## Verify
+## Test
+
+```bash
+dotnet test tests/Cardly.Api.Tests
+```
+
+## Run and Verify
 
 ```bash
 curl http://localhost:5239/weatherforecast
