@@ -1,0 +1,6 @@
+@Cardly.Api_HostAddress = http://localhost:5239
+
+GET {{Cardly.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
