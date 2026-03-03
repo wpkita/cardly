@@ -55,3 +55,4 @@ yarn-error.log*
 
 # Flutter
 google-services.json
+devtools_options.yaml
