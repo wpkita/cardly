@@ -295,7 +295,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              '${winner.name} wins with ${winner.score} points!',
+              _gameRoom!.message ?? '${winner.name} wins with ${winner.score} points!',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 40),

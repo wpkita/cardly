@@ -5,7 +5,81 @@ import 'package:uuid/uuid.dart';
 
 import '../models/game_room.dart';
 import '../models/playing_card.dart';
-import '../models/rummy_game_state.dart';
+
+enum _MeldType { set, run }
+
+class _Meld {
+  _Meld({required this.cards, required this.type});
+  final List<PlayingCard> cards;
+  final _MeldType type;
+
+  int get points {
+    if (type == _MeldType.run) {
+      return cards.fold(0, (sum, card) {
+        if (card.rank == Rank.ace) {
+          final hasTwo = cards.any((c) => c.rank == Rank.two);
+          final hasKing = cards.any((c) => c.rank == Rank.king);
+          return sum + card.points(aceHigh: hasKing && !hasTwo);
+        }
+        return sum + card.points();
+      });
+    }
+    return cards.fold(0, (sum, card) => sum + card.points());
+  }
+
+  bool isValid() {
+    if (cards.length < 3) return false;
+    return type == _MeldType.set ? _isValidSet() : _isValidRun();
+  }
+
+  bool _isValidSet() {
+    if (cards.isEmpty) return false;
+    final rank = cards.first.rank;
+    final suits = <Suit>{};
+    for (final card in cards) {
+      if (card.rank != rank) return false;
+      suits.add(card.suit);
+    }
+    return suits.length == cards.length && cards.length <= 4;
+  }
+
+  bool _isValidRun() {
+    if (cards.isEmpty) return false;
+    final suit = cards.first.suit;
+    for (final card in cards) {
+      if (card.suit != suit) return false;
+    }
+    final rankIndices = cards.map((c) => c.rank.index).toList();
+    rankIndices.sort();
+    final hasAce = rankIndices.contains(0);
+    final hasKing = rankIndices.contains(12);
+    final hasTwo = rankIndices.contains(1);
+    if (hasAce) {
+      if (hasKing && !hasTwo) {
+        final aceHighIndices = rankIndices.map((i) => i == 0 ? 13 : i).toList();
+        aceHighIndices.sort();
+        if (_isConsecutive(aceHighIndices)) return true;
+      }
+      if (hasTwo && !hasKing) {
+        if (_isConsecutive(rankIndices)) return true;
+      }
+      if (hasKing && hasTwo) return false;
+      if (!hasKing && !hasTwo) {
+        if (_isConsecutive(rankIndices)) return true;
+      }
+    } else {
+      if (_isConsecutive(rankIndices)) return true;
+    }
+    return false;
+  }
+
+  bool _isConsecutive(List<int> indices) {
+    for (var i = 1; i < indices.length; i++) {
+      if (indices[i] != indices[i - 1] + 1) return false;
+    }
+    return true;
+  }
+}
 
 class FirebaseGameService {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
@@ -227,9 +301,9 @@ class FirebaseGameService {
         .map((i) => room.players[playerIndex].hand[i])
         .toList();
     final playingCards = cards.map((c) => c.toPlayingCard()).toList();
-    final meld = Meld(
+    final meld = _Meld(
       cards: playingCards,
-      type: meldType == 'set' ? MeldType.set : MeldType.run,
+      type: meldType == 'set' ? _MeldType.set : _MeldType.run,
     );
 
     if (!meld.isValid()) {
@@ -320,9 +394,9 @@ class FirebaseGameService {
       for (final meldData in player.melds) {
         final playingCards =
             meldData.cards.map((c) => c.toPlayingCard()).toList();
-        final meld = Meld(
+        final meld = _Meld(
           cards: playingCards,
-          type: meldData.type == 'set' ? MeldType.set : MeldType.run,
+          type: meldData.type == 'set' ? _MeldType.set : _MeldType.run,
         );
         meldPoints += meld.points;
       }

@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
-import 'rummy_500_screen.dart';
 import 'screens/game_lobby_screen.dart';
 
 void main() async {
@@ -23,7 +22,6 @@ class MyApp extends StatelessWidget {
     return '/';
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -47,76 +45,17 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(
-              builder: (context) => const MyHomePage(title: 'Cardly'),
-              settings: settings,
-            );
-          case '/rummy':
-            return MaterialPageRoute(
-              builder: (context) => const Rummy500Screen(),
+              builder: (context) => const GameLobbyScreen(),
               settings: settings,
             );
           default:
             return MaterialPageRoute(
-              builder: (context) => const MyHomePage(title: 'Cardly'),
+              builder: (context) => const GameLobbyScreen(),
               settings: settings,
             );
         }
       },
       initialRoute: _getInitialRoute(),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({required this.title, super.key});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.style, size: 100, color: Colors.deepPurple),
-            const SizedBox(height: 20),
-            const Text(
-              'Cardly',
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Play Card Games Online',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 60),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Rummy500Screen(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.style),
-              label: const Text('Play Rummy 500'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
