@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/game_room.dart';
 import '../models/playing_card.dart';
+import 'game_service.dart';
 
 enum _MeldType { set, run }
 
@@ -81,10 +82,11 @@ class _Meld {
   }
 }
 
-class FirebaseGameService {
+class FirebaseGameService implements GameService {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final Uuid _uuid = const Uuid();
 
+  @override
   Future<GameRoom> createGameRoom(String hostPlayerId, String hostName) async {
     final roomId = _uuid.v4().substring(0, 6).toUpperCase();
 
@@ -108,6 +110,7 @@ class FirebaseGameService {
     return gameRoom;
   }
 
+  @override
   Future<GameRoom?> joinGameRoom(
     String roomId,
     String guestPlayerId,
@@ -181,6 +184,7 @@ class FirebaseGameService {
     });
   }
 
+  @override
   Stream<GameRoom?> watchGameRoom(String roomId) {
     return _database.child('rooms').child(roomId).onValue.map((event) {
       if (!event.snapshot.exists) {
@@ -190,6 +194,7 @@ class FirebaseGameService {
     });
   }
 
+  @override
   Future<void> drawFromDeck(String roomId, String playerId) async {
     final roomRef = _database.child('rooms').child(roomId);
     final snapshot = await roomRef.get();
@@ -223,6 +228,7 @@ class FirebaseGameService {
     });
   }
 
+  @override
   Future<void> drawFromDiscard(
     String roomId,
     String playerId,
@@ -279,6 +285,7 @@ class FirebaseGameService {
     });
   }
 
+  @override
   Future<bool> playMeld(
     String roomId,
     String playerId,
@@ -338,6 +345,7 @@ class FirebaseGameService {
     return true;
   }
 
+  @override
   Future<void> discard(String roomId, String playerId, int handIndex) async {
     final roomRef = _database.child('rooms').child(roomId);
     final snapshot = await roomRef.get();
@@ -453,6 +461,7 @@ class FirebaseGameService {
     await _dealCards(room.roomId, room);
   }
 
+  @override
   Future<bool> undoDiscardDraw(String roomId, String playerId) async {
     final roomRef = _database.child('rooms').child(roomId);
     final snapshot = await roomRef.get();
@@ -493,10 +502,12 @@ class FirebaseGameService {
     return true;
   }
 
+  @override
   Future<void> deleteGameRoom(String roomId) async {
     await _database.child('rooms').child(roomId).remove();
   }
 
+  @override
   String getGameUrl(String roomId) {
     return 'https://cardly.kita.llc/join/$roomId';
   }

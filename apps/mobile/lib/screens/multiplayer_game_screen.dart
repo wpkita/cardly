@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/game_room.dart';
-import '../services/firebase_game_service.dart';
+import '../services/game_service.dart';
 import '../widgets/card_widget.dart';
 import '../widgets/discard_pile_widget.dart';
 import '../widgets/player_hand.dart';
@@ -24,7 +25,7 @@ class MultiplayerGameScreen extends StatefulWidget {
 }
 
 class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
-  final FirebaseGameService _gameService = FirebaseGameService();
+  late final GameService _gameService;
   GameRoom? _gameRoom;
   final List<int> _selectedHandIndices = [];
   bool _showShareDialog = false;
@@ -32,6 +33,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> {
   @override
   void initState() {
     super.initState();
+    _gameService = context.read<GameService>();
     if (widget.isHost) {
       _showShareDialog = true;
     }

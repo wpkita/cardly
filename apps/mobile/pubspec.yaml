@@ -45,6 +45,12 @@ dependencies:
   # UUID generation for game rooms
   uuid: ^4.5.1
 
+  # SignalR client for .NET Core Web API
+  signalr_netcore: ^1.4.4
+
+  # Dependency injection
+  provider: ^6.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

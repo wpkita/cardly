@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../services/firebase_game_service.dart';
+import '../services/game_service.dart';
 import 'multiplayer_game_screen.dart';
 
 class GameLobbyScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class GameLobbyScreen extends StatefulWidget {
 }
 
 class _GameLobbyScreenState extends State<GameLobbyScreen> {
-  final FirebaseGameService _gameService = FirebaseGameService();
+  late final GameService _gameService;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _roomCodeController = TextEditingController();
   final String _playerId = const Uuid().v4();
@@ -25,6 +26,7 @@ class _GameLobbyScreenState extends State<GameLobbyScreen> {
   @override
   void initState() {
     super.initState();
+    _gameService = context.read<GameService>();
     if (widget.joinRoomId != null) {
       _roomCodeController.text = widget.joinRoomId!;
     }
